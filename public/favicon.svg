@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="gavelGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2563eb" />
+      <stop offset="100%" stop-color="#1d4ed8" />
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="12" fill="url(#gavelGradient)" />
+  <path d="M18 20h10v24H18z" fill="#f8fafc" />
+  <path d="M36 20h10v18H36z" fill="#f8fafc" />
+  <path d="M16 46h32v5H16z" fill="#e0e7ff" />
+  <path d="M24 15h16v5H24z" fill="#c7d2fe" />
+</svg>
