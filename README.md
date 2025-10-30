@@ -71,3 +71,8 @@ Yes, you can!
 To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
 
 Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+
+### LinkedIn-style Enhancements (optional)
+- Toggle via Vite env: set `VITE_LINKEDIN_UI_ENHANCEMENTS=true`.
+- Composer and feed post UI are frontend-only; integrate with your APIs later.
+- New optional routes (behind the flag): `/post/new`, `/consultation/:id`.

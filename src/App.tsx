@@ -1,69 +1,46 @@
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
-import { MessagingProvider } from "./contexts/MessagingContext";
-import { ConnectionsProvider } from "./contexts/ConnectionsContext";
-import MessageBar from "./components/MessageBar";
-import Index from "./pages/Index";
-import Login from "./pages/Login";
-import Signup from "./pages/Signup";
-import Dashboard from "./pages/Dashboard";
-import LawyerProfile from "./pages/LawyerProfile";
-import SearchLawyers from "./pages/SearchLawyers";
-import Consults from "./pages/Consults";
-import Notifications from "./pages/Notifications";
-import Settings from "./pages/Settings";
-import NotFound from "./pages/NotFound";
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
+import { AppHeader } from '@/components/layout/AppHeader'
+import { MessagingProvider } from '@/context/MessagingContext'
+import { HomePage } from '@/pages/Home'
+import { NetworkPage } from '@/pages/Network'
+import { MessagesPage } from '@/pages/Messages'
+import { OpportunitiesPage } from '@/pages/Opportunities'
+import { AlertsPage } from '@/pages/Alerts'
+import { SettingsPage } from '@/pages/Settings'
+import { ProfilePage } from '@/pages/Profile'
+import { LoginPage } from '@/pages/Login'
+import { RegisterPage } from '@/pages/Register'
+import { NotFoundPage } from '@/pages/NotFound'
 
-const queryClient = new QueryClient();
-
-const AppRoutes = () => {
-  const location = useLocation();
-  const pathname = location.pathname;
-
-  const shouldShowMessageBar =
-    pathname === "/dashboard" ||
-    pathname === "/search" ||
-    pathname === "/profile" ||
-    pathname.startsWith("/lawyer");
+const AppShell = () => {
+  const { pathname } = useLocation()
+  const hideChrome = pathname === '/login' || pathname === '/register'
 
   return (
-    <>
+    <div className='min-h-screen bg-[var(--brand-sand)]'>
+      {!hideChrome && <AppHeader />}
       <Routes>
-        <Route path="/" element={<Index />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/profile" element={<LawyerProfile />} />
-        <Route path="/lawyer/:id" element={<LawyerProfile />} />
-        <Route path="/search" element={<SearchLawyers />} />
-        <Route path="/consults" element={<Consults />} />
-        <Route path="/notifications" element={<Notifications />} />
-        <Route path="/settings" element={<Settings />} />
-        {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-        <Route path="*" element={<NotFound />} />
+        <Route path='/' element={<HomePage />} />
+        <Route path='/network' element={<NetworkPage />} />
+        <Route path='/messages' element={<MessagesPage />} />
+        <Route path='/opportunities' element={<OpportunitiesPage />} />
+        <Route path='/alerts' element={<AlertsPage />} />
+        <Route path='/settings' element={<SettingsPage />} />
+        <Route path='/profile/:id' element={<ProfilePage />} />
+        <Route path='/login' element={<LoginPage />} />
+        <Route path='/register' element={<RegisterPage />} />
+        <Route path='*' element={<NotFoundPage />} />
       </Routes>
-      {shouldShowMessageBar && <MessageBar />}
-    </>
-  );
-};
+    </div>
+  )
+}
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <ConnectionsProvider>
-        <MessagingProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <AppRoutes />
-          </BrowserRouter>
-        </MessagingProvider>
-      </ConnectionsProvider>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+  <MessagingProvider>
+    <BrowserRouter>
+      <AppShell />
+    </BrowserRouter>
+  </MessagingProvider>
+)
 
-export default App;
+export default App
