@@ -22,7 +22,7 @@ const MessagingContext = createContext<MessagingContextValue | undefined>(undefi
 export const MessagingProvider = ({ children }: { children: ReactNode }) => {
   const [conversations, setConversations] = useState(seedConversations)
   const [messages, setMessages] = useState(seedMessages)
-  const [currentConversationId, setCurrentConversationIdState] = useState<string | null>(seedConversations[0]?.id ?? null)
+  const [currentConversationId, setCurrentConversationIdState] = useState<string | null>(null)
 
   const setCurrentConversationId = useCallback((id: string | null) => {
     setCurrentConversationIdState(id)
@@ -97,7 +97,7 @@ export const MessagingProvider = ({ children }: { children: ReactNode }) => {
       startConversation,
       markAllRead,
     }),
-    [conversations, messages, currentConversationId, sendMessage, startConversation, markAllRead],
+      [conversations, messages, currentConversationId, sendMessage, startConversation, markAllRead, setCurrentConversationId],
   )
 
   return <MessagingContext.Provider value={value}>{children}</MessagingContext.Provider>

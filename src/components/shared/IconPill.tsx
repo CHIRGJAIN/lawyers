@@ -19,4 +19,3 @@ export const IconPill = ({ active = false, className, children }: IconPillProps)
     {children}
   </span>
 )
-

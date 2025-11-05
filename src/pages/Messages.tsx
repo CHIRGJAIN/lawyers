@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState, type ChangeEvent, type FormEvent } from 'react'
+import { useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent } from 'react'
 import { Search, Send } from 'lucide-react'
 import { useMessaging, lawyerDirectory } from '@/context/MessagingContext'
 import { cn } from '@/utils/cn'
@@ -31,14 +31,22 @@ export const MessagesPage = () => {
   }, [conversations, query])
 
   const activeConversation = useMemo(() => {
-    const direct = conversations.find((item) => item.id === currentConversationId)
-    return direct ?? filtered[0] ?? null
-  }, [conversations, currentConversationId, filtered])
+    if (!currentConversationId) return null
+    return conversations.find((item) => item.id === currentConversationId) ?? null
+  }, [conversations, currentConversationId])
 
   const activeMessages = useMemo(() => {
     if (!activeConversation) return []
     return messages.filter((message) => message.conversationId === activeConversation.id)
   }, [messages, activeConversation])
+
+  useEffect(() => {
+    if (!currentConversationId) return
+    const exists = conversations.some((item) => item.id === currentConversationId)
+    if (!exists) {
+      setCurrentConversationId(null)
+    }
+  }, [conversations, currentConversationId, setCurrentConversationId])
 
   const handleSend = () => {
     if (!activeConversation) return
@@ -91,9 +99,9 @@ export const MessagesPage = () => {
 
   return (
     <main className='mx-auto min-h-[calc(100vh-88px)] w-full max-w-6xl px-4 py-8 sm:px-6'>
-      <div className='rounded-3xl border border-[var(--brand-border)] bg-white shadow-[var(--shadow-sm)]'>
+      <div className='rounded-3xl border border-[var(--brand-border)] bg-[var(--surface-primary)] shadow-[var(--shadow-sm)]'>
         <div className='grid min-h-[70vh] grid-cols-1 sm:grid-cols-[260px_minmax(0,1fr)]'>
-          <aside className='border-b border-[var(--brand-border)] px-6 py-6 sm:border-b-0 sm:border-r'>
+          <aside className='border-b border-[var(--brand-border)] bg-[var(--surface-muted)] px-6 py-6 sm:rounded-l-3xl sm:border-b-0 sm:border-r'>
             <h1 className='text-lg font-semibold text-[var(--brand-ink)]'>Messages</h1>
             <p className='text-xs text-[var(--brand-muted)]'>Stay aligned with co-counsel, clients, and partners.</p>
             <div className='relative mt-4'>
@@ -138,7 +146,7 @@ export const MessagesPage = () => {
             </div>
           </aside>
 
-          <section className='flex min-h-[50vh] flex-col'>
+          <section className='flex min-h-[50vh] flex-col bg-[var(--surface-muted)] sm:rounded-r-3xl'>
             {activeConversation ? (
               <>
                 <header className='flex items-center justify-between border-b border-[var(--brand-border)] px-6 py-6'>

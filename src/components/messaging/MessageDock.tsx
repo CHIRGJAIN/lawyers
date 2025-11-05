@@ -21,7 +21,12 @@ const formatTime = (iso: string) => {
 
 type ViewMode = 'focused' | 'other'
 
-export const MessageDock = () => {
+type MessageDockProps = {
+  floating?: boolean
+  className?: string
+}
+
+export const MessageDock = ({ floating = true, className }: MessageDockProps) => {
   const { conversations, messages, currentConversationId, setCurrentConversationId, sendMessage, startConversation, markAllRead } =
     useMessaging()
   const navigate = useNavigate()
@@ -95,8 +100,14 @@ export const MessageDock = () => {
 
   const availableContacts = useMemo(() => Object.values(lawyerDirectory), [])
 
+  const containerClasses = cn(
+    'z-40 w-full max-w-[360px] rounded-3xl bg-[var(--brand-sand)] shadow-[var(--shadow-lg)] backdrop-blur',
+    floating ? 'fixed bottom-4 right-4 bg-[var(--brand-sand)]/90' : 'relative',
+    className,
+  )
+
   return (
-    <aside className='fixed bottom-4 right-4 z-50 w-[360px] rounded-3xl bg-[var(--brand-sand)]/90 shadow-[var(--shadow-lg)] backdrop-blur'>
+    <aside className={containerClasses}>
       <div className='flex items-center justify-between rounded-t-3xl border-b border-[var(--brand-border)] px-4 py-3'>
         <div>
           <h3 className='text-sm font-semibold text-[var(--brand-ink)]'>Messaging</h3>

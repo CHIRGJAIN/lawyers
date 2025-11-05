@@ -8,39 +8,14 @@ import { useTransientMessage } from '@/hooks/useTransientMessage'
 export const ProfilePage = () => {
   const { id } = useParams()
   const lawyer = lawyers.find((item) => item.id === id) ?? lawyers[0]
+  const { profile } = lawyer
   const navigate = useNavigate()
   const { startConversation, sendMessage } = useMessaging()
   const { message, showMessage } = useTransientMessage()
   const [introRequested, setIntroRequested] = useState(false)
 
-  const highlights = [
-    'Advised a NASDAQ-listed SaaS company on Indian data localisation readiness and regulator outreach.',
-    'Lead counsel on USD 320M Series C fundraise with multi-jurisdictional diligence and governance structuring.',
-    'Defended promoter group in concurrent CCI, SEBI and ED investigations leading to favourable closure.',
-  ]
-
-  const experience = [
-    {
-      role: 'Managing Partner - Menon Chambers',
-      period: '2019 - Present',
-      summary:
-        'Head cross-border technology and corporate governance practice. Regularly advise boards and investors on strategic risk and regulatory matters.',
-    },
-    {
-      role: 'Senior Associate - LexAtlas',
-      period: '2014 - 2019',
-      summary:
-        'Built privacy and venture capital playbooks for scaling startups and multinational clients; ran diligence pods across India and APAC.',
-    },
-  ]
-
-  const education = [
-    { title: 'LL.M. Technology & Innovation Law', institution: 'University of Cambridge' },
-    { title: 'B.A. LL.B (Hons.)', institution: 'National Law University, Delhi' },
-  ]
-
   const handleDownloadProfile = () => {
-    const profileSummary = [
+    const summaryLines = [
       `${lawyer.name}`,
       lawyer.headline,
       `Location: ${lawyer.location}`,
@@ -48,11 +23,38 @@ export const ProfilePage = () => {
       `Experience: ${lawyer.experienceYears}+ years`,
       `Bar number: ${lawyer.barNumber}`,
       '',
+      'Focus sectors:',
+      ...profile.sectors.map((item) => `- ${item}`),
+      '',
+      'Differentiators:',
+      ...profile.differentiators.map((item) => `- ${item}`),
+      '',
+      'Signature matters:',
+      ...profile.signatureMatters.map((item) => `- ${item}`),
+      '',
       'Availability:',
       lawyer.availability,
-    ].join('\n')
+    ]
 
-    const blob = new Blob([profileSummary], { type: 'text/plain' })
+    if (profile.representativeClients?.length) {
+      summaryLines.push('', 'Representative clients:', ...profile.representativeClients.map((item) => `- ${item}`))
+    }
+
+    if (profile.feeModels?.length) {
+      summaryLines.push('', 'Engagement formats:', ...profile.feeModels.map((item) => `- ${item}`))
+    }
+
+    if (profile.recognitions?.length || profile.memberships?.length) {
+      summaryLines.push('', 'Recognition & affiliations:')
+      if (profile.recognitions) {
+        summaryLines.push(...profile.recognitions.map((item) => `- ${item}`))
+      }
+      if (profile.memberships) {
+        summaryLines.push(...profile.memberships.map((item) => `- ${item}`))
+      }
+    }
+
+    const blob = new Blob([summaryLines.join('\n')], { type: 'text/plain' })
     const url = URL.createObjectURL(blob)
     const anchor = document.createElement('a')
     anchor.href = url
@@ -127,23 +129,42 @@ export const ProfilePage = () => {
         </section>
 
         <div className='grid gap-6 lg:grid-cols-[2fr_1fr]'>
-          <section className='card space-y-4 px-6 py-6 text-sm text-[var(--brand-muted)]'>
-            <h2 className='text-lg font-semibold text-[var(--brand-ink)]'>About the practice</h2>
-            <p>
-              {lawyer.name} partners with growth-stage companies, investors and general counsel on complex {lawyer.specialties.join(', ')}
-              mandates. The practice emphasises technology-forward diligence, strategic risk advisory and outcome-based pricing across
-              India, APAC and US corridors.
-            </p>
-            <p>
-              Regularly serves as outside general counsel for venture portfolios, navigating policy matrices, privacy regimes and board
-              governance for multinational rollouts. Licensed to appear before the Supreme Court of India and multiple High Courts.
-            </p>
+          <section className='card space-y-6 px-6 py-6 text-sm text-[var(--brand-muted)]'>
+            <h2 className='text-lg font-semibold text-[var(--brand-ink)]'>Practice snapshot</h2>
+            <div className='space-y-4 leading-relaxed'>
+              {profile.overview.map((paragraph) => (
+                <p key={paragraph}>{paragraph}</p>
+              ))}
+            </div>
+            <div className='grid gap-5 md:grid-cols-2'>
+              <div className='space-y-3'>
+                <h3 className='text-xs font-semibold uppercase tracking-wide text-[var(--brand-muted)]'>Core differentiators</h3>
+                <ul className='space-y-2'>
+                  {profile.differentiators.map((item) => (
+                    <li key={item} className='flex items-start gap-2'>
+                      <span className='mt-2 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-[var(--brand-blue)]' />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div className='space-y-3'>
+                <h3 className='text-xs font-semibold uppercase tracking-wide text-[var(--brand-muted)]'>Key sectors</h3>
+                <div className='flex flex-wrap gap-2'>
+                  {profile.sectors.map((item) => (
+                    <IconPill key={item} className='bg-[var(--brand-sand)]/80 text-[var(--brand-ink)]'>
+                      {item}
+                    </IconPill>
+                  ))}
+                </div>
+              </div>
+            </div>
           </section>
 
           <aside className='space-y-4'>
-            <div className='card space-y-3 px-5 py-5 text-sm text-[var(--brand-muted)]'>
+            <div className='card h-fit space-y-3 px-5 py-5 text-sm text-[var(--brand-muted)]'>
               <h3 className='text-sm font-semibold text-[var(--brand-ink)]'>Availability</h3>
-              <p>{lawyer.availability}</p>
+              <p className='leading-relaxed'>{lawyer.availability}</p>
               <button
                 type='button'
                 onClick={handleIntroCall}
@@ -153,15 +174,84 @@ export const ProfilePage = () => {
                 {introRequested ? 'Intro requested' : 'Request intro call'}
               </button>
             </div>
-            <div className='card space-y-3 px-5 py-5 text-sm text-[var(--brand-muted)]'>
+
+            {profile.representativeClients?.length ? (
+              <div className='card h-fit space-y-3 px-5 py-5 text-sm text-[var(--brand-muted)]'>
+                <h3 className='text-sm font-semibold text-[var(--brand-ink)]'>Representative clients</h3>
+                <ul className='space-y-2 leading-relaxed'>
+                  {profile.representativeClients.map((item) => (
+                    <li key={item} className='flex items-start gap-2'>
+                      <span className='mt-2 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-[var(--brand-blue)]/80' />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
+
+            {profile.feeModels?.length ? (
+              <div className='card h-fit space-y-3 px-5 py-5 text-sm text-[var(--brand-muted)]'>
+                <h3 className='text-sm font-semibold text-[var(--brand-ink)]'>Engagement formats</h3>
+                <ul className='space-y-2 leading-relaxed'>
+                  {profile.feeModels.map((item) => (
+                    <li key={item} className='flex items-start gap-2'>
+                      <span className='mt-2 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-[var(--brand-blue)]/80' />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
+
+            {(profile.recognitions?.length || profile.memberships?.length) && (
+              <div className='card h-fit space-y-4 px-5 py-5 text-sm text-[var(--brand-muted)]'>
+                <h3 className='text-sm font-semibold text-[var(--brand-ink)]'>Recognition & affiliations</h3>
+                {profile.recognitions?.length ? (
+                  <div>
+                    <p className='text-xs font-semibold uppercase tracking-wide text-[var(--brand-muted)]'>Recognition</p>
+                    <ul className='mt-2 space-y-2'>
+                      {profile.recognitions.map((item) => (
+                        <li key={item} className='flex items-start gap-2'>
+                          <span className='mt-2 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-[var(--brand-blue)]/80' />
+                          <span>{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
+                {profile.memberships?.length ? (
+                  <div>
+                    <p className='text-xs font-semibold uppercase tracking-wide text-[var(--brand-muted)]'>Memberships</p>
+                    <ul className='mt-2 space-y-2'>
+                      {profile.memberships.map((item) => (
+                        <li key={item} className='flex items-start gap-2'>
+                          <span className='mt-2 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-[var(--brand-blue)]/80' />
+                          <span>{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
+              </div>
+            )}
+
+            <div className='card h-fit space-y-3 px-5 py-5 text-sm text-[var(--brand-muted)]'>
               <h3 className='text-sm font-semibold text-[var(--brand-ink)]'>Contact</h3>
               <p>
                 Email - <a href={`mailto:${lawyer.email}`} className='text-[var(--brand-blue)]'>{lawyer.email}</a>
               </p>
               <p>
-                LinkedIn - <a href='#' className='text-[var(--brand-blue)]'>linkedin.com/in/{lawyer.id}</a>
+                LinkedIn -{' '}
+                <a
+                  href={`https://www.linkedin.com/in/${lawyer.id}`}
+                  className='text-[var(--brand-blue)]'
+                  target='_blank'
+                  rel='noreferrer'
+                >
+                  {`linkedin.com/in/${lawyer.id}`}
+                </a>
               </p>
-              <p>Office - Bengaluru & Mumbai</p>
+              <p>Office - {lawyer.location}</p>
             </div>
           </aside>
         </div>
@@ -169,7 +259,7 @@ export const ProfilePage = () => {
         <section className='card px-6 py-6 text-sm text-[var(--brand-muted)]'>
           <h2 className='text-lg font-semibold text-[var(--brand-ink)]'>Signature matters</h2>
           <div className='mt-3 space-y-3'>
-            {highlights.map((item) => (
+            {profile.signatureMatters.map((item) => (
               <div key={item} className='rounded-2xl border border-[var(--brand-border)] px-4 py-3'>
                 {item}
               </div>
@@ -180,8 +270,8 @@ export const ProfilePage = () => {
         <section className='card px-6 py-6 text-sm text-[var(--brand-muted)]'>
           <h2 className='text-lg font-semibold text-[var(--brand-ink)]'>Experience</h2>
           <div className='mt-3 space-y-4'>
-            {experience.map((item) => (
-              <div key={item.role} className='rounded-2xl bg-[var(--brand-sand)]/70 px-4 py-4'>
+            {profile.experience.map((item) => (
+              <div key={`${item.role}-${item.period}`} className='rounded-2xl bg-[var(--brand-sand)]/70 px-4 py-4'>
                 <p className='text-sm font-semibold text-[var(--brand-ink)]'>{item.role}</p>
                 <p className='text-xs uppercase tracking-wide text-[var(--brand-muted)]'>{item.period}</p>
                 <p className='mt-2 leading-relaxed'>{item.summary}</p>
@@ -193,14 +283,55 @@ export const ProfilePage = () => {
         <section className='card px-6 py-6 text-sm text-[var(--brand-muted)]'>
           <h2 className='text-lg font-semibold text-[var(--brand-ink)]'>Education & certifications</h2>
           <ul className='mt-3 space-y-3'>
-            {education.map((item) => (
-              <li key={item.title} className='rounded-2xl border border-[var(--brand-border)] px-4 py-3'>
+            {profile.education.map((item) => (
+              <li key={`${item.title}-${item.institution}`} className='rounded-2xl border border-[var(--brand-border)] px-4 py-3'>
                 <p className='font-semibold text-[var(--brand-ink)]'>{item.title}</p>
-                <p className='text-xs uppercase tracking-wide text-[var(--brand-muted)]'>{item.institution}</p>
+                <p className='text-xs uppercase tracking-wide text-[var(--brand-muted)]'>
+                  {item.institution}
+                  {item.year ? ` · ${item.year}` : ''}
+                </p>
               </li>
             ))}
           </ul>
         </section>
+
+        {profile.publications?.length ? (
+          <section className='card px-6 py-6 text-sm text-[var(--brand-muted)]'>
+            <h2 className='text-lg font-semibold text-[var(--brand-ink)]'>Publications & speaking</h2>
+            <ul className='mt-3 space-y-3'>
+              {profile.publications.map((item) => (
+                <li key={item.title} className='rounded-2xl border border-[var(--brand-border)] px-4 py-3'>
+                  <p className='font-semibold text-[var(--brand-ink)]'>{item.title}</p>
+                  {item.detail ? <p className='text-xs text-[var(--brand-muted)]'>{item.detail}</p> : null}
+                  {item.url ? (
+                    <a
+                      href={item.url}
+                      target='_blank'
+                      rel='noreferrer'
+                      className='mt-2 inline-block text-xs font-semibold text-[var(--brand-blue)]'
+                    >
+                      View resource
+                    </a>
+                  ) : null}
+                </li>
+              ))}
+            </ul>
+          </section>
+        ) : null}
+
+        {profile.proBono?.length ? (
+          <section className='card px-6 py-6 text-sm text-[var(--brand-muted)]'>
+            <h2 className='text-lg font-semibold text-[var(--brand-ink)]'>Pro bono & community</h2>
+            <ul className='mt-3 space-y-2'>
+              {profile.proBono.map((item) => (
+                <li key={item} className='flex items-start gap-2'>
+                  <span className='mt-2 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-[var(--brand-blue)]' />
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ) : null}
       </div>
     </div>
   )
